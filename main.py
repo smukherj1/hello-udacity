@@ -16,10 +16,51 @@
 #
 import webapp2
 
+form = '''
+<form method="get" action="/testform">
+	<label>
+		<input type="radio" name="q" value="1">
+		One<br>
+	</label>
+	<label>
+		<input type="radio" name="q" value="2">
+		Two<br>
+	</label>
+	<label>
+		<input type="radio" name="q" value="3">
+		Three<br>
+	</label>
+	<br>
+	<select name="r">
+		<option>one</option>
+		<option>two</option>
+		<option>three</option>
+	</select>
+	<br>
+	<br>
+	<input type="submit">
+</form>
+'''
+
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello, Udacity! How you doin?')
+        self.response.out.write(form)
+
+class TestHandler(webapp2.RequestHandler):
+    def get(self):
+    	q = self.request.get("q")
+        self.response.out.write("Why do you want to submit '%s'?"%q)
+        #self.response.headers['Content-Type'] = 'text/plain'
+        #self.response.write(self.request)
+
+    def post(self):
+    	q = self.request.get("q")
+        self.response.out.write("Why do you want to submit '%s'?"%q)
+        #self.response.headers['Content-Type'] = 'text/plain'
+        #self.response.write(self.request)
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
+    ('/', MainHandler),
+    ('/testform', TestHandler)
 ], debug=True)
