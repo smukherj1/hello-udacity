@@ -31,6 +31,9 @@ class Blog(db.Model):
 	content = db.TextProperty()
 	created = db.DateTimeProperty(auto_now_add=True)
 
+	def get_content(self):
+		return self.content.replace('\n', '<br>')
+
 class Handler(webapp2.RequestHandler):
 	def render_str(self, template, **params):
 		t = jinja_env.get_template(template)

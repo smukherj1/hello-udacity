@@ -1,24 +1,17 @@
-<!DOCTYPE HTML>
-<html>
-	<body>
-		<title>My Blog</title>
-		<h1>My Blog. Add a new Entry!</h1>
-		<form method="post">
-			<div>
-				<label> Subject
-				</label>
-				<input name="subject" type="text" size="100" value="{{ subject }}">
-			</div>
-			<div>
-				<label>Blog Entry
-				</label>
-				<textarea name="content">{{ content }}</textarea>
-			</div>
-			<div>
-			{{ error_str }}
-			</div>
-			<input type="submit">
-		</form>
-		
-	</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Add a new entry!</h2>
+<form method="post">
+	<label>
+		<div>Subject</div>
+		<input name="subject" type="text" size="100" value="{{ subject }}">
+	</label>
+	<label>
+		<div>Blog Entry</div>
+		<textarea name="content">{{ content }}</textarea>
+	</label>
+	<div class="error">{{ error_str }}</div>
+	<input type="submit">
+</form>
+{% endblock %}

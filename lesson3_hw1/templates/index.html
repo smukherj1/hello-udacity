@@ -1,14 +1,21 @@
-<!DOCTYPE HTML>
-<html>
-	<body>
-		<title>My Blog</title>
-		<h1>My Blog</h1>
-		{% for b in blogs %}
-			<h2>{{ b.subject }}</h2>
-			<div>
-			{{ b.content }}
-			</div>
-			<hr>
-		{% endfor %}
-	</body>
-</html>
+{% extends "base.html" %}
+
+{% block content %}
+	{% for b in blogs %}
+		<div class="post">
+  			<div class="post-heading">
+    			<div class="post-title">
+      			{{b.subject}}
+    			</div>
+
+    			<div class="post-date">
+      			{{b.created.strftime("%b %d, %Y")}}
+    			</div>
+  			</div>
+
+  			<div class="post-content">
+    			{{ b.get_content() | safe }}
+  			</div>
+		</div>
+	{% endfor %}
+{% endblock %}
