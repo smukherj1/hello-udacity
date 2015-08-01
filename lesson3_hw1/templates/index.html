@@ -1,0 +1,14 @@
+<!DOCTYPE HTML>
+<html>
+	<body>
+		<title>My Blog</title>
+		<h1>My Blog</h1>
+		{% for b in blogs %}
+			<h2>{{ b.subject }}</h2>
+			<div>
+			{{ b.content }}
+			</div>
+			<hr>
+		{% endfor %}
+	</body>
+</html>
