@@ -19,11 +19,17 @@ import webapp2
 import jinja2
 import cgi
 import re
-rom google.appengine.ext import db
+import time
+from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader= jinja2.FileSystemLoader(template_dir),
 	autoescape= True)
+
+class Blog(db.Model):
+	subject = db.StringProperty()
+	content = db.TextProperty()
+	created = db.DateTimeProperty(auto_now_add=True)
 
 class Handler(webapp2.RequestHandler):
 	def render_str(self, template, **params):
@@ -39,19 +45,51 @@ class Handler(webapp2.RequestHandler):
 class MainHandler(Handler):
 
 	def get(self):
-		return self.render_blog()
+		q = db.GqlQuery("SELECT * from Blog ORDER BY created DESC")
+		return self.render_blog(q)
 
 class NewPostHandler(Handler):
+
+	def render_new_blog(self, error_str="", content="", subject=""):
+		self.render('new.html', error_str = error_str,
+			subject = subject,
+			content = content)
+		return
+
 	def get(self):
 		return self.render('new.html')
 
 	def post(self):
-		return self.render('new.html')
+		subject = self.request.get("subject")
+		content = self.request.get("content")
+
+		if not subject and not content:
+			return self.render_new_blog("Y U NO provide subject and content?")
+		elif not subject:
+			return self.render_new_blog("Y U NO provide subject?", content = content)
+		elif not content:
+			return self.render_new_blog("Y U NO provide content?", subject = subject)
+
+		b = Blog(subject=subject, content=content)
+		b.put()
+
+		time.sleep(2)
+		return self.redirect('/' + str(b.key().id()))
 
 class BlogEntryHandler(Handler):
 	def get(self, blog_id):
-		return self.render_blog()
+		blog_id = int(blog_id)
+		q = db.GqlQuery("SELECT * from Blog WHERE __key__ = KEY('Blog', :1)", 
+			blog_id)
+		blogs = q.fetch(1)
+		if not blogs:
+			self.error(404)
+			return self.response.write('<h1>404 Not Found</h1><br>' + \
+				'Oops! Could not find that blog')
+		return self.render_blog(blogs)
 
 app = webapp2.WSGIApplication([
 	('/', MainHandler),
+	('/newpost', NewPostHandler),
+	('/(\d+)', BlogEntryHandler),
 ], debug=True)
