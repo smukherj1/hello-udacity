@@ -28,7 +28,14 @@ label + label {
 }
 
 input[type=text] {
-    width: 500px;
+    width: 450px;
+    font-size: 20px;
+    padding: 2px;
+    font-family: monospace;
+}
+
+input[type=password] {
+    width: 450px;
     font-size: 20px;
     padding: 2px;
     font-family: monospace;

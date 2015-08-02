@@ -14,36 +14,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import os
 import webapp2
-import jinja2
 import cgi
 import re
 import time
-from google.appengine.ext import db
+from utils import *
 
-template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader= jinja2.FileSystemLoader(template_dir),
-	autoescape= True)
 
-class Blog(db.Model):
-	subject = db.StringProperty()
-	content = db.TextProperty()
-	created = db.DateTimeProperty(auto_now_add=True)
-
-	def get_content(self):
-		return self.content.replace('\n', '<br>')
-
-class Handler(webapp2.RequestHandler):
-	def render_str(self, template, **params):
-		t = jinja_env.get_template(template)
-		return t.render(params)
-
-	def render(self, template, **kw):
-		self.response.write(self.render_str(template, **kw))
-
-	def render_blog(self, blogs=[], logged_in_user=""):
-		return self.render('index.html', blogs=blogs, logged_in_user=logged_in_user)
 
 class MainHandler(Handler):
 
@@ -51,14 +28,36 @@ class MainHandler(Handler):
 		q = db.GqlQuery("SELECT * from Blog ORDER BY created DESC")
 		return self.render_blog(q)
 
+class SignupHandler(Handler):
+	def render_signup(self,
+		username="",
+		email="",
+		uerror="",
+		perror="",
+		pverror="",
+		eerror=""):
+		return self.render('signup.html',
+			username="",
+			email="",
+			uerror=uerror,
+			perror=perror,
+			pverror=pverror,
+			eerror=eerror)
+
+	def get(self):
+		return self.render_signup()
+
+	def post(self):
+		return self.render_signup()
+
+
 class NewPostHandler(Handler):
 
 	def render_new_blog(self, error_str="", content="", subject="", logged_in_user=""):
-		self.render('new.html', error_str = error_str,
+		return self.render('new.html', error_str = error_str,
 			subject = subject,
 			content = content,
 			logged_in_user = logged_in_user)
-		return
 
 	def get(self):
 		return self.render('new.html')
@@ -77,7 +76,7 @@ class NewPostHandler(Handler):
 		b = Blog(subject=subject, content=content)
 		b.put()
 
-		time.sleep(2)
+		time.sleep(0.5)
 		return self.redirect('/' + str(b.key().id()))
 
 class BlogEntryHandler(Handler):
@@ -95,5 +94,6 @@ class BlogEntryHandler(Handler):
 app = webapp2.WSGIApplication([
 	('/', MainHandler),
 	('/newpost', NewPostHandler),
+	('/signup', SignupHandler),
 	('/(\d+)', BlogEntryHandler),
 ], debug=True)
