@@ -5,19 +5,34 @@
 
   <title>Suvanjan's Blog</title>
 </head>
-
 <body>
-  <a href="/" class="main-title">
-    Suvanjan's Blog
-  </a>
-  <a href="/newpost" class="main-links">
-  	Add new entry
-  </a>
-
-  <div id="content">
-  {% block content %}
-  {% endblock %}
-  </div>
+<table id="main-layout-table">
+	<tr id="main-header">
+		<td colspan="3">
+			<h1>Suvanjan's Blog</h1>
+		</td>
+	</tr>
+	<tr id="main-links">
+		<td>
+			<a href="/">Home</a>
+		</td>
+		<td>
+			<a href="/newpost">New Entry</a>
+		</td>
+		<td>
+			{% if logged_in_user %}
+				{{ logged_in_user }} <a href="/logout">Log Out</a>
+			{% else %}
+				<a href="/signup">Sign Up</a>
+			{% endif %}
+		</td>
+	</tr>
+	<tr>
+	<td id="content" colspan="3">
+		{% block content %}
+  		{% endblock %}
+	</td>
+	</tr>
+</table>
 </body>
-
 </html>

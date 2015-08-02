@@ -42,8 +42,8 @@ class Handler(webapp2.RequestHandler):
 	def render(self, template, **kw):
 		self.response.write(self.render_str(template, **kw))
 
-	def render_blog(self, blogs=[]):
-		return self.render('index.html', blogs=blogs)
+	def render_blog(self, blogs=[], logged_in_user=""):
+		return self.render('index.html', blogs=blogs, logged_in_user=logged_in_user)
 
 class MainHandler(Handler):
 
@@ -53,10 +53,11 @@ class MainHandler(Handler):
 
 class NewPostHandler(Handler):
 
-	def render_new_blog(self, error_str="", content="", subject=""):
+	def render_new_blog(self, error_str="", content="", subject="", logged_in_user=""):
 		self.render('new.html', error_str = error_str,
 			subject = subject,
-			content = content)
+			content = content,
+			logged_in_user = logged_in_user)
 		return
 
 	def get(self):
