@@ -15,8 +15,6 @@
 # limitations under the License.
 #
 import webapp2
-import cgi
-import re
 import time
 from utils import *
 
@@ -48,7 +46,64 @@ class SignupHandler(Handler):
 		return self.render_signup()
 
 	def post(self):
-		return self.render_signup()
+		username = self.request.get('username')
+		password = self.request.get('password')
+		verify = self.request.get('verify')
+		email = self.request.get('email')
+
+		s_username = sanitize(username)
+		s_email = sanitize(email)
+
+		uerror = ""
+		perror = ""
+		pverror = ""
+		eerror = ""
+		error = False
+
+		if not valid_username(username):
+			uerror = "That's not a valid username."
+			error = True
+		if not valid_password(password):
+			perror = "That wasn't a valid password."
+			error = True
+		elif password != verify:
+			pverror = "Your passwords didn't match"
+			error = True
+		if email and not valid_email(email):
+			eerror = "That's not a valid email."
+			error = True
+		if error:
+			return self.render_signup(uerror=uerror,
+				perror=perror,
+				pverror=pverror,
+				eerror=eerror,
+				username=s_username,
+				email=s_email)
+
+		user = get_user(s_username)
+		if not user:
+			if not email:
+				s_email = None
+			user = User(name=s_username, 
+				password=hash_user_info(s_username, password),
+				email=s_email)
+			user.put()
+		else:
+			return self.render_signup(uerror="User already exists!",
+				username=s_username)
+		set_user_cookie(self.response, user)
+
+		return self.redirect('/welcome')
+
+class WelcomeHandler(Handler):
+	def get(self):
+		user_cookie = self.request.cookies.get('user', '')
+		username = verify_user_cookie(user_cookie)
+
+		if username:
+			self.render('welcome.html', logged_in_user=username)
+		else:
+			self.redirect('/')
 
 
 class NewPostHandler(Handler):
@@ -95,5 +150,6 @@ app = webapp2.WSGIApplication([
 	('/', MainHandler),
 	('/newpost', NewPostHandler),
 	('/signup', SignupHandler),
+	('/welcome', WelcomeHandler),
 	('/(\d+)', BlogEntryHandler),
 ], debug=True)
