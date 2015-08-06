@@ -26,6 +26,58 @@ class MainHandler(Handler):
 		q = db.GqlQuery("SELECT * from Blog ORDER BY created DESC")
 		return self.render_blog(q)
 
+class LoginHandler(Handler):
+	def render_login(self,
+		username="",
+		uerror="",
+		perror=""):
+		return self.render('login.html',
+			username=username,
+			uerror=uerror,
+			perror=perror)
+
+	def get(self):
+		return self.render_login()
+
+	def post(self):
+		username = self.request.get('username')
+		password = self.request.get('password')
+		s_username = sanitize(username)
+
+		uerror = ""
+		perror = ""
+		error = False
+		if not valid_username(username):
+			uerror = "That's not a valid username."
+			error = True
+		if not valid_password(password):
+			perror = "That wasn't a valid password."
+			error = True
+
+		user = None
+		if not uerror:
+			user = get_user(s_username)
+			if not user:
+				uerror = "That user doesn't exist!"
+				error = True
+			elif not check_user_info(s_username, password, user.password):
+				perror = "Invalid login"
+				error = True
+		if error:
+			return self.render_login(username=s_username,
+				uerror=uerror,
+				perror=perror)
+		set_user_cookie(self.response, user)
+		return self.redirect('/welcome')
+
+class LogoutHandler(Handler):
+	def get(self):
+		unset_user_cookie(self.response)
+		return self.redirect('/signup')
+
+
+
+
 class SignupHandler(Handler):
 	def render_signup(self,
 		username="",
@@ -148,8 +200,10 @@ class BlogEntryHandler(Handler):
 
 app = webapp2.WSGIApplication([
 	('/', MainHandler),
-	('/newpost', NewPostHandler),
-	('/signup', SignupHandler),
-	('/welcome', WelcomeHandler),
+	('/newpost/?', NewPostHandler),
+	('/signup/?', SignupHandler),
+	('/login/?', LoginHandler),
+	('/logout/?', LogoutHandler),
+	('/welcome/?', WelcomeHandler),
 	('/(\d+)', BlogEntryHandler),
 ], debug=True)

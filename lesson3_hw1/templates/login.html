@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" action="/login">
+<table>
+<tbody>
+	<tr>
+		<td colspan="3">
+			<h2>Login</h2>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+		<label>Username</label>
+		</td>
+		<td align="right">
+		<input type="text" name="username" value="{{ username }}">
+		</td>
+		<td align="right">
+		<label style="color: red"><b>{{ uerror }}</b></label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+		<label>Password</label>
+		</td>
+		<td align="right">
+		<input type="password" name="password">
+		</td>
+		<td align="right">
+		<label style="color: red"><b>{{ perror }}</b></label>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="submit">
+		</td>
+	</tr>
+</tbody>
+</table>
+</form>
+{% endblock %}

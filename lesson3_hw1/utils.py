@@ -103,6 +103,10 @@ def set_user_cookie(response, user):
 	response.headers.add_header('Set-Cookie', 'user=%s; Path=/'%cookie_value)
 	return
 
+def unset_user_cookie(response):
+	response.headers.add_header('Set-Cookie', 'user=; Path=/')
+	return
+
 class Blog(db.Model):
 	subject = db.StringProperty(required=True)
 	content = db.TextProperty(required=True)
