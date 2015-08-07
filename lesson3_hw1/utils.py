@@ -62,15 +62,34 @@ def put_to_memcache(key, val):
 		continue
 	return
 
+def get_permalink(key_id):
+	global last_query_time
+	key_id_str = str(key_id)
+	val, last_query_time = memcache_client.gets(key_id_str) or (None, last_query_time)
+	if val == None:
+		last_query_time = time.time()
+		q = db.GqlQuery("SELECT * from Blog WHERE __key__ = KEY('Blog', :1)", 
+			key_id)
+		val= q.fetch(1)
+		if val:
+			put_to_memcache(key_id_str, (val, last_query_time))
+	return val
+
+def flush_cache():
+	if not memcache.flush_all():
+		logging.error("Failed to flush memcache")
+	else:
+		logging.info("Memcache flushed")
+
 
 def get_blog_list_for_front_page(update=False):
 	global last_query_time
-	val = memcache_client.gets(FRONT_PAGE_KEY)
+	val, last_query_time = memcache_client.gets(FRONT_PAGE_KEY) or (None, last_query_time)
 	if update or val == None:
 		last_query_time = time.time()
-		q = db.GqlQuery("SELECT * from Blog ORDER BY created DESC")
+		q = db.GqlQuery("SELECT * from Blog ORDER BY created DESC LIMIT 10")
 		val = list(q)
-		put_to_memcache(FRONT_PAGE_KEY, val)
+		put_to_memcache(FRONT_PAGE_KEY, (val, last_query_time))
 	return val
 
 

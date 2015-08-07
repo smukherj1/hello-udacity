@@ -190,14 +190,17 @@ class NewPostHandler(Handler):
 class BlogEntryHandler(Handler):
 	def get(self, blog_id):
 		blog_id = int(blog_id)
-		q = db.GqlQuery("SELECT * from Blog WHERE __key__ = KEY('Blog', :1)", 
-			blog_id)
-		blogs = q.fetch(1)
+		blogs = get_permalink(blog_id)
 		if not blogs:
 			self.error(404)
 			return self.response.write('<h1>404 Not Found</h1><br>' + \
 				'Oops! Could not find that blog')
 		return self.render_blog(blogs)
+
+class BlogCacheFlushHandler(Handler):
+	def get(self):
+		flush_cache()
+		return self.redirect('/')
 
 app = webapp2.WSGIApplication([
 	('/', MainHandler),
@@ -206,5 +209,6 @@ app = webapp2.WSGIApplication([
 	('/login/?', LoginHandler),
 	('/logout/?', LogoutHandler),
 	('/welcome/?', WelcomeHandler),
+	('/flush/?', BlogCacheFlushHandler),
 	('/(\d+)', BlogEntryHandler),
 ], debug=True)
