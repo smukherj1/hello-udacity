@@ -2,6 +2,7 @@ import webapp2
 import os
 import cgi
 from google.appengine.ext import db
+from google.appengine.api import memcache
 import jinja2
 import hashlib
 import hmac
@@ -9,6 +10,8 @@ import string
 import random
 import datetime
 import re
+import time
+import logging
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader= jinja2.FileSystemLoader(template_dir),
@@ -21,6 +24,9 @@ EMAIL_RE = re.compile(r'^[\S]+@[\S]+\.[\S]+$')
 
 SECRET = 'NA3kjq8K5R'
 SALT_CHARS = string.ascii_letters + string.digits + '@#$%!&*'
+FRONT_PAGE_KEY = '0'
+last_query_time = time.time()
+memcache_client = memcache.Client()
 
 def make_salt(slen=5):
 	salt = ''
@@ -46,7 +52,26 @@ def check_user_info(username, password, h):
 		return True
 	return False
 
+def put_to_memcache(key, val):
+	oldval = memcache_client.gets(key)
+	if oldval == None:
+		memcache.set(key, val)
+		return
+	while not memcache_client.cas(key, val):
+		logging.critical('MEMCACHE CAS Operation Failed')
+		continue
+	return
 
+
+def get_blog_list_for_front_page(update=False):
+	global last_query_time
+	val = memcache_client.gets(FRONT_PAGE_KEY)
+	if update or val == None:
+		last_query_time = time.time()
+		q = db.GqlQuery("SELECT * from Blog ORDER BY created DESC")
+		val = list(q)
+		put_to_memcache(FRONT_PAGE_KEY, val)
+	return val
 
 
 def valid_username(username):
@@ -133,4 +158,7 @@ class Handler(webapp2.RequestHandler):
 		self.response.write(self.render_str(template, **kw))
 
 	def render_blog(self, blogs=[], logged_in_user=""):
-		return self.render('index.html', blogs=blogs, logged_in_user=logged_in_user)
+		return self.render('index.html', 
+			blogs=blogs, 
+			logged_in_user=logged_in_user,
+			last_updated='%.2f'%(time.time()-last_query_time))

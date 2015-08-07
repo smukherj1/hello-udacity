@@ -23,7 +23,7 @@ from utils import *
 class MainHandler(Handler):
 
 	def get(self):
-		q = db.GqlQuery("SELECT * from Blog ORDER BY created DESC")
+		q = get_blog_list_for_front_page()
 		return self.render_blog(q)
 
 class LoginHandler(Handler):
@@ -184,6 +184,7 @@ class NewPostHandler(Handler):
 		b.put()
 
 		time.sleep(0.5)
+		get_blog_list_for_front_page(True)
 		return self.redirect('/' + str(b.key().id()))
 
 class BlogEntryHandler(Handler):
