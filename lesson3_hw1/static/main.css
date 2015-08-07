@@ -88,6 +88,12 @@ input[type=submit] {
     font-weight: bold;
 }
 
+a.nodecor
+{
+    text-decoration: none; 
+    color: inherit;
+}
+
 .post-date {
     position: absolute;
     right: 20px;
