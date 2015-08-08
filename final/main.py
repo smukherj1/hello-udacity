@@ -153,19 +153,15 @@ class MainHandler(Handler):
 				edit_link="/_edit/" + title,
 				content=wiki.content)
 		elif self.logged_in_user:
-			self.redirect('/_edit/' + title)
-		elif title == "front":
-			self.response.write('''
-Oops! Seems like our front page is messed up. Since we are a low budget site and don't have
-a group of highly trained monkeys like Google to fix this, this may take a while :(
-''')
+			return self.redirect('/_edit/' + title)
+		return self.redirect('/login')
 
 
 class EditHandler(Handler):
 
 	def get(self, title):
 		if not self.logged_in_user:
-			self.redirect('/')
+			return self.redirect('/login')
 		logging.info("Wiki Title edit request " + title)
 		wiki = Wiki.getEntryByTitle(title)
 		content=""
@@ -177,16 +173,10 @@ class EditHandler(Handler):
 
 	def post(self, title):
 		if not self.logged_in_user:
-			self.redirect('/')
+			self.redirect('/login')
 		content = self.request.get('content')
-		wiki = Wiki.getEntryByTitle(title)
-		if wiki:
-			logging.critical('TODO: Make this a part of transaction')
-			wiki.content = content
-			wiki.put()
-		else:
-			wiki = Wiki(title=title, content=content)
-			wiki.put()
+		wiki = Wiki(title=title, content=content)
+		wiki.put()
 
 		if title == 'front':
 			title = ""

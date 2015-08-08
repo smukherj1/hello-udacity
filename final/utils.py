@@ -116,14 +116,8 @@ class Wiki(db.Model):
 
 	@staticmethod
 	def getEntryByTitle(title):
-		wikis = list(Wiki.all().filter('title =', title))
-
-		if wikis:
-			if len(wikis) != 1:
-				logging.error("%d wikis with title '%s'"%(len(wikis), title))
-			else:
-				return wikis[0]
-		return
+		wiki = Wiki.all().filter('title =', title).order('-created').get()
+		return wiki
 
 class User(db.Model):
 	name = db.StringProperty(required=True)
