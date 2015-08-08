@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<form method="post" action="/signup">
+<table>
+<tbody>
+	<tr>
+		<td colspan="3">
+			<h2>Sign Up!</h2>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+		<label>Username</label>
+		</td>
+		<td align="right">
+		<input type="text" name="username" value="{{ username }}">
+		</td>
+		<td align="right">
+		<label style="color: red"><b>{{ uerror }}</b></label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+		<label>Password</label>
+		</td>
+		<td align="right">
+		<input type="password" name="password">
+		</td>
+		<td align="right">
+		<label style="color: red"><b>{{ perror }}</b></label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+		<label>Verify Password</label>
+		</td>
+		<td align="right">
+		<input type="password" name="verify">
+		</td>
+		<td align="right">
+		<label style="color: red"><b>{{ pverror }}</b></label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+		<label>Email (optional)</label>
+		</td>
+		<td align="right">
+		<input type="text" name="email" value="{{ email }}">
+		</td>
+		<td align="right">
+		<label style="color: red"><b>{{ eerror }}</b></label>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="submit">
+		</td>
+	</tr>
+</tbody>
+</table>
+</form>
+{% endblock %}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link type="text/css" rel="stylesheet" href="/static/main.css" />
+
+  <title>Suvanjan's Wiki</title>
+</head>
+<body>
+<table id="main-layout-table">
+	<tr id="main-links">
+		<td>
+			<a href="/">Home</a>
+		</td>
+		<td>
+			{% if edit_link and logged_in_user %}
+			<a href="{{edit_link}}">Edit</a>
+			{% endif %}
+		</td>
+		<td>
+			{% if logged_in_user %}
+				({{ logged_in_user }}) <a href="/logout">Log Out</a>
+			{% else %}
+				<a href="/signup">Sign Up</a>
+				<a href="/login">Login</a>
+			{% endif %}
+		</td>
+	</tr>
+	<tr>
+	<td id="content" colspan="3">
+		{% block content %}
+  		{% endblock %}
+	</td>
+	</tr>
+</table>
+</body>
+</html>
