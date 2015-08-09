@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<br>
+<br>
+<table id="history-table" width="800px">
+	{% for wiki in wikis %}
+	<tr>
+		<td>
+			{{ wiki.created.strftime("%c") }}
+		</td>
+		<td>
+			{{ wiki.content[:100] }}
+		</td>
+		<td>
+			<a href="{{wiki.view_link()}}">View</a>
+			<a href="{{wiki.edit_link()}}">Edit</a>
+		</td>
+	</tr>
+	{% endfor %}
+</table>
+{% endblock %}

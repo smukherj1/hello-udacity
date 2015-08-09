@@ -119,6 +119,25 @@ class Wiki(db.Model):
 		wiki = Wiki.all().filter('title =', title).order('-created').get()
 		return wiki
 
+	@staticmethod
+	def getEntryById(wiki_id):
+		wiki = Wiki.get_by_id(wiki_id)
+		return wiki
+
+	@staticmethod
+	def getAllEntries(title):
+		wikis = list(Wiki.all().filter('title =', title).order('-created'))
+		return wikis
+
+	def view_link(self):
+		return '/' + self.title + '?id=' + str(self.key().id())
+
+	def edit_link(self):
+		return '/_edit/' + self.title + '?id=' + str(self.key().id())
+
+	def edit_link_no_id(self):
+		return '/_edit/' + self.title
+
 class User(db.Model):
 	name = db.StringProperty(required=True)
 	password = db.StringProperty(required=True)

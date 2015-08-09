@@ -146,11 +146,23 @@ class MainHandler(Handler):
 
 	def get(self, title="front"):
 		logging.info("Wiki Title request " + title + ", user: " + str(self.logged_in_user))
-		wiki = Wiki.getEntryByTitle(title)
+		wiki_id = self.request.get('id')
+		wiki = None
+
+		if wiki_id and wiki_id.isdigit():
+			wiki = Wiki.getEntryById(int(wiki_id))
+		else:
+			wiki = Wiki.getEntryByTitle(title)
 		if wiki:
+			edit_link = ""
+			if wiki_id:
+				edit_link = wiki.edit_link()
+			else:
+				edit_link = wiki.edit_link_no_id()
 			return self.render('index.html', 
 				logged_in_user=self.logged_in_user,
-				edit_link="/_edit/" + title,
+				edit_link=edit_link,
+				history_link="/_history/" + title,
 				content=wiki.content)
 		elif self.logged_in_user:
 			return self.redirect('/_edit/' + title)
@@ -163,25 +175,51 @@ class EditHandler(Handler):
 		if not self.logged_in_user:
 			return self.redirect('/login')
 		logging.info("Wiki Title edit request " + title)
-		wiki = Wiki.getEntryByTitle(title)
+		wiki_id = self.request.get('id')
+		wiki = None
+
+		if wiki_id and wiki_id.isdigit():
+			wiki = Wiki.getEntryById(int(wiki_id))
+		else:
+			wiki = Wiki.getEntryByTitle(title)
 		content=""
 		if wiki:
 			content = wiki.content
 		return self.render('new.html', 
 			logged_in_user=self.logged_in_user,
+			wiki_id=wiki_id,
 			content=content)
 
 	def post(self, title):
 		if not self.logged_in_user:
 			self.redirect('/login')
 		content = self.request.get('content')
-		wiki = Wiki(title=title, content=content)
+		wiki_id = self.request.get('id')
+		wiki = None
+
+		if wiki_id and wiki_id.isdigit():
+			wiki = Wiki.getEntryById(int(wiki_id))
+			wiki.content = content
+		else:
+			wiki = Wiki(title=title, content=content)
 		wiki.put()
 
 		if title == 'front':
 			title = ""
 
-		return self.redirect('/' + title)
+		id_param = ''
+		if wiki_id and wiki:
+			id_param = '?id=' + wiki_id
+		return self.redirect('/' + title + id_param)
+
+class HistoryHandler(Handler):
+	def get(self, title):
+		if not self.logged_in_user:
+			self.redirect('/login')
+		wikis = Wiki.getAllEntries(title)
+		return self.render('history.html',
+			logged_in_user=self.logged_in_user,
+			wikis=wikis)
 
 
 
@@ -191,5 +229,6 @@ app = webapp2.WSGIApplication([
 	('/login/?', LoginHandler),
 	('/logout/?', LogoutHandler),
 	('/_edit/' + PAGE_RE_STR, EditHandler),
+	('/_history/' + PAGE_RE_STR, HistoryHandler),
 	('/' + PAGE_RE_STR, MainHandler),
 ], debug=True)

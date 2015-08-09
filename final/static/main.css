@@ -56,6 +56,10 @@ input[type=submit] {
     width: 100%;
 }
 
+#history-table {
+    border: 1px solid black;
+}
+
 #main-header {
     color: #222;
     font-size: 20px;
